@@ -8,7 +8,7 @@
 flask db init
 
 # Generate migration script
-flask db migrate -m "Initial migration"
+flask db migrate
 
 # Apply migrations to create tables
 flask db upgrade

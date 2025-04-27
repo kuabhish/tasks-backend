@@ -16,6 +16,7 @@ class Customer(db.Model):
     max_users = db.Column(db.Integer, nullable=True)
     logo_url = db.Column(db.String(255), nullable=True)
     time_zone = db.Column(db.String(50), nullable=False, default='UTC')
+    domain = db.Column(db.String(100), nullable=True)  # New field
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -32,6 +33,7 @@ class Customer(db.Model):
             'maxUsers': self.max_users,
             'logoUrl': self.logo_url,
             'timeZone': self.time_zone,
+            'domain': self.domain,
             'createdAt': self.created_at.isoformat(),
             'updatedAt': self.updated_at.isoformat()
         }

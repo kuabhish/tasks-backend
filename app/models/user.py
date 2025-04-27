@@ -9,7 +9,7 @@ class User(db.Model):
     customer_id = db.Column(db.String(36), db.ForeignKey('customers.id'), nullable=False)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.Text, nullable=False)
     role = db.Column(db.Enum('Admin', 'Project Manager', 'Team Member', name='user_role'), default='Team Member')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
