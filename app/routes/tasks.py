@@ -24,11 +24,45 @@ def create_task():
         return success_response(data=result, message=result["message"], status_code=status_code)
     return error_response(message=result["error"], status_code=status_code)
 
+@tasks_bp.route("/update/<task_id>", methods=["PUT"])
+@AuthAndLogMiddleware.authenticate_and_log
+def update_task(task_id):
+    data = request.get_json()
+    result, status_code = task_service.update_task(task_id, data)
+    if status_code == 200:
+        return success_response(data=result, message=result["message"], status_code=status_code)
+    return error_response(message=result["error"], status_code=status_code)
+
+@tasks_bp.route("/delete/<task_id>", methods=["DELETE"])
+@AuthAndLogMiddleware.authenticate_and_log
+def delete_task(task_id):
+    result, status_code = task_service.delete_task(task_id)
+    if status_code == 200:
+        return success_response(data=result, message=result["message"], status_code=status_code)
+    return error_response(message=result["error"], status_code=status_code)
+
 @tasks_bp.route("/subtasks/create", methods=["POST"])
 @AuthAndLogMiddleware.authenticate_and_log
 def create_subtask():
     data = request.get_json()
     result, status_code = task_service.create_subtask(data)
     if status_code == 201:
+        return success_response(data=result, message=result["message"], status_code=status_code)
+    return error_response(message=result["error"], status_code=status_code)
+
+@tasks_bp.route("/subtasks/update/<subtask_id>", methods=["PUT"])
+@AuthAndLogMiddleware.authenticate_and_log
+def update_subtask(subtask_id):
+    data = request.get_json()
+    result, status_code = task_service.update_subtask(subtask_id, data)
+    if status_code == 200:
+        return success_response(data=result, message=result["message"], status_code=status_code)
+    return error_response(message=result["error"], status_code=status_code)
+
+@tasks_bp.route("/subtasks/delete/<subtask_id>", methods=["DELETE"])
+@AuthAndLogMiddleware.authenticate_and_log
+def delete_subtask(subtask_id):
+    result, status_code = task_service.delete_subtask(subtask_id)
+    if status_code == 200:
         return success_response(data=result, message=result["message"], status_code=status_code)
     return error_response(message=result["error"], status_code=status_code)

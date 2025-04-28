@@ -2,6 +2,7 @@ from uuid import uuid4
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import ARRAY
 from app import db
+from sqlalchemy.orm import relationship
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -20,6 +21,8 @@ class Task(db.Model):
     actual_duration = db.Column(db.Integer, nullable=True, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    subtasks = relationship('Subtask', backref='task', cascade='all, delete-orphan')
 
     def to_dict(self):
         return {
