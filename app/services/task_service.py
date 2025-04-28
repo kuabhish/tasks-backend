@@ -95,7 +95,7 @@ class TaskService:
                 "error": str(e),
                 "traceback": traceback.format_exc()
             })
-            db.session.rollback()
+            # db.session.rollback()
             return {"error": f"Failed to create task: {str(e)}"}, 500
 
     @staticmethod
@@ -156,5 +156,5 @@ class TaskService:
                 "error": str(e),
                 "traceback": traceback.format_exc()
             })
-            db.session.rollback()
+            # db.session.rollback()
             return {"error": f"Failed to create subtask: {str(e)}"}, 500

@@ -45,7 +45,7 @@ class TeamService:
                 "error": str(e),
                 "traceback": traceback.format_exc()
             })
-            db.session.rollback()
+            # db.session.rollback()
             return {"error": f"Failed to create team: {str(e)}"}, 500
 
     @staticmethod
@@ -134,7 +134,7 @@ class TeamService:
                 "error": str(e),
                 "traceback": traceback.format_exc()
             })
-            db.session.rollback()
+            # db.session.rollback()
             return {"error": f"Failed to add user to team: {str(e)}"}, 500
 
     @staticmethod
@@ -168,5 +168,5 @@ class TeamService:
                 "error": str(e),
                 "traceback": traceback.format_exc()
             })
-            db.session.rollback()
+            # db.session.rollback()
             return {"error": f"Failed to remove user from team: {str(e)}"}, 500

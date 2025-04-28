@@ -64,7 +64,7 @@ class AuthService:
                 "error": str(e),
                 "traceback": traceback.format_exc()
             })
-            db.session.rollback()
+            # db.session.rollback()
             return {"error": f"Failed to register user: {str(e)}"}, 500
 
     @staticmethod

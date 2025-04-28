@@ -117,6 +117,6 @@ class TimeEntryService:
                 "error": str(e),
                 "traceback": traceback.format_exc()
             })
-            db.session.rollback()
+            # db.session.rollback()
             return {"error": f"Failed to create time entry: {str(e)}"}, 500
         
