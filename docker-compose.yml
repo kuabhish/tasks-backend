@@ -1,8 +1,8 @@
 version: "3"
 
 services:
-  tango_api:
-    image: tango_api
+  tasks_api:
+    image: tasks_api
     build: .
     ports:
       - "5000:5000"
@@ -15,4 +15,4 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - tango_api
+      - tasks_api
