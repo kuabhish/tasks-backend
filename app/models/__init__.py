@@ -8,5 +8,3 @@ from .category import Category
 from .task import Task
 from .subtask import Subtask
 from .time_entry import TimeEntry
-from .dependency import Dependency
-from .task_template import TaskTemplate, SubtaskTemplate

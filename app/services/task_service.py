@@ -2,6 +2,8 @@ from flask import request
 from ..models.task import Task
 from ..models.subtask import Subtask
 from ..models.project import Project
+from ..models.user import User
+from ..models.team import Team
 from ..utils.logger import app_logger
 import traceback
 from typing import Tuple, List
@@ -24,10 +26,9 @@ class TaskService:
             if project_id:
                 query = query.filter_by(project_id=project_id)
             if role == "Team Member":
-                query = query.filter_by(assigned_user_id=user_id)
+                query = query.join(Subtask, Task.id == Subtask.task_id).filter(Subtask.assigned_user_id == user_id)
 
             tasks = query.all()
-            # Include subtasks in the response
             task_dicts = []
             for task in tasks:
                 task_dict = task.to_dict()
@@ -61,7 +62,6 @@ class TaskService:
             if role not in ["Admin", "Project Manager"]:
                 return {"error": "Insufficient permissions"}, 403
 
-            # Verify project exists and belongs to customer
             project = Project.query.filter_by(id=data["project_id"], customer_id=customer_id).first()
             if not project:
                 return {"error": "Project not found or unauthorized"}, 404
@@ -75,11 +75,7 @@ class TaskService:
                 description=data.get("description", ""),
                 status=data["status"],
                 priority=data.get("priority", "Medium"),
-                assigned_user_id=data.get("assigned_user_id"),
-                assigned_team_id=data.get("assigned_team_id"),
                 due_date=datetime.fromisoformat(data["due_date"]) if data.get("due_date") else None,
-                is_recurring=data.get("is_recurring", False),
-                recurring_pattern=data.get("recurring_pattern", {}),
                 tags=data.get("tags", []),
                 estimated_duration=data.get("estimated_duration"),
                 actual_duration=data.get("actual_duration", 0),
@@ -119,10 +115,21 @@ class TaskService:
             if role not in ["Admin", "Project Manager"]:
                 return {"error": "Insufficient permissions"}, 403
 
-            # Verify parent task exists and belongs to customer
             task = Task.query.filter_by(id=data["task_id"], customer_id=customer_id).first()
             if not task:
                 return {"error": "Parent task not found or unauthorized"}, 404
+
+            assigned_user_id = data.get("assigned_user_id")
+            if assigned_user_id:
+                user = User.query.filter_by(id=assigned_user_id, customer_id=customer_id).first()
+                if not user:
+                    return {"error": "Assigned user not found or unauthorized"}, 404
+
+            assigned_team_id = data.get("assigned_team_id")
+            if assigned_team_id:
+                team = Team.query.filter_by(id=assigned_team_id, customer_id=customer_id).first()
+                if not team:
+                    return {"error": "Assigned team not found or unauthorized"}, 404
 
             subtask = Subtask(
                 id=str(uuid4()),
@@ -130,8 +137,9 @@ class TaskService:
                 title=data["title"],
                 description=data.get("description", ""),
                 status=data["status"],
-                assigned_user_id=data.get("assigned_user_id"),
-                assigned_team_id=data.get("assigned_team_id"),
+                assigned_user_id=assigned_user_id,
+                assigned_team_id=assigned_team_id,
+                due_date=datetime.fromisoformat(data["due_date"]) if data.get("due_date") else None,
                 tags=data.get("tags", []),
                 estimated_duration=data.get("estimated_duration"),
                 created_at=datetime.utcnow(),

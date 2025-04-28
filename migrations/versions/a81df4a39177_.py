@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: bb6f22aecf40
+Revision ID: a81df4a39177
 Revises: 
-Create Date: 2025-04-27 02:35:40.887401
+Create Date: 2025-04-28 03:20:31.160398
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'bb6f22aecf40'
+revision = 'a81df4a39177'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -59,7 +59,7 @@ def upgrade():
     sa.Column('customer_id', sa.String(length=36), nullable=False),
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
-    sa.Column('password_hash', sa.String(length=128), nullable=False),
+    sa.Column('password_hash', sa.Text(), nullable=False),
     sa.Column('role', sa.Enum('Admin', 'Project Manager', 'Team Member', name='user_role'), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -88,17 +88,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['project_manager_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('task_templates',
-    sa.Column('id', sa.String(length=36), nullable=False),
-    sa.Column('customer_id', sa.String(length=36), nullable=False),
-    sa.Column('title', sa.String(length=255), nullable=False),
-    sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('category_id', sa.String(length=36), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
-    sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('team_members',
     sa.Column('user_id', sa.String(length=36), nullable=False),
     sa.Column('team_id', sa.String(length=36), nullable=False),
@@ -116,14 +105,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('subtask_templates',
-    sa.Column('id', sa.String(length=36), nullable=False),
-    sa.Column('template_id', sa.String(length=36), nullable=False),
-    sa.Column('title', sa.String(length=255), nullable=False),
-    sa.Column('description', sa.Text(), nullable=True),
-    sa.ForeignKeyConstraint(['template_id'], ['task_templates.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('tasks',
     sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('customer_id', sa.String(length=36), nullable=False),
@@ -133,8 +114,6 @@ def upgrade():
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('status', sa.Enum('Not Started', 'In Progress', 'Completed', name='task_status'), nullable=True),
     sa.Column('priority', sa.Enum('Low', 'Medium', 'High', name='task_priority'), nullable=True),
-    sa.Column('assigned_user_id', sa.String(length=36), nullable=True),
-    sa.Column('assigned_team_id', sa.String(length=36), nullable=True),
     sa.Column('due_date', sa.DateTime(), nullable=True),
     sa.Column('is_recurring', sa.Boolean(), nullable=True),
     sa.Column('recurring_pattern', postgresql.JSON(astext_type=sa.Text()), nullable=True),
@@ -143,8 +122,6 @@ def upgrade():
     sa.Column('actual_duration', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['assigned_team_id'], ['teams.id'], ),
-    sa.ForeignKeyConstraint(['assigned_user_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], ),
     sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ),
@@ -158,6 +135,7 @@ def upgrade():
     sa.Column('status', sa.Enum('Not Started', 'In Progress', 'Completed', name='subtask_status'), nullable=True),
     sa.Column('assigned_user_id', sa.String(length=36), nullable=True),
     sa.Column('assigned_team_id', sa.String(length=36), nullable=True),
+    sa.Column('due_date', sa.DateTime(), nullable=True),
     sa.Column('tags', postgresql.ARRAY(sa.String()), nullable=True),
     sa.Column('estimated_duration', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -167,52 +145,31 @@ def upgrade():
     sa.ForeignKeyConstraint(['task_id'], ['tasks.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('dependencies',
-    sa.Column('id', sa.String(length=36), nullable=False),
-    sa.Column('task_id', sa.String(length=36), nullable=False),
-    sa.Column('depends_on_task_id', sa.String(length=36), nullable=True),
-    sa.Column('depends_on_subtask_id', sa.String(length=36), nullable=True),
-    sa.CheckConstraint('(depends_on_task_id IS NOT NULL AND depends_on_subtask_id IS NULL) OR (depends_on_task_id IS NULL AND depends_on_subtask_id IS NOT NULL)', name='check_depends_on_task_or_subtask'),
-    sa.ForeignKeyConstraint(['depends_on_subtask_id'], ['subtasks.id'], ),
-    sa.ForeignKeyConstraint(['depends_on_task_id'], ['tasks.id'], ),
-    sa.ForeignKeyConstraint(['task_id'], ['tasks.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('time_entries',
     sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('customer_id', sa.String(length=36), nullable=False),
     sa.Column('user_id', sa.String(length=36), nullable=False),
     sa.Column('subtask_id', sa.String(length=36), nullable=False),
-    sa.Column('start_time', sa.DateTime(), nullable=False),
-    sa.Column('end_time', sa.DateTime(), nullable=False),
+    sa.Column('start_time', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('end_time', sa.DateTime(timezone=True), nullable=False),
     sa.Column('duration', sa.Integer(), nullable=False),
     sa.Column('notes', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], ),
     sa.ForeignKeyConstraint(['subtask_id'], ['subtasks.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.drop_table('task')
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.create_table('task',
-    sa.Column('id', sa.INTEGER(), autoincrement=True, nullable=False),
-    sa.Column('title', sa.VARCHAR(length=128), autoincrement=False, nullable=False),
-    sa.Column('is_completed', sa.BOOLEAN(), autoincrement=False, nullable=True),
-    sa.PrimaryKeyConstraint('id', name='task_pkey')
-    )
     op.drop_table('time_entries')
-    op.drop_table('dependencies')
     op.drop_table('subtasks')
     op.drop_table('tasks')
-    op.drop_table('subtask_templates')
     op.drop_table('project_metrics')
     op.drop_table('team_members')
-    op.drop_table('task_templates')
     op.drop_table('projects')
     op.drop_table('users')
     op.drop_table('teams')

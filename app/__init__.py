@@ -5,7 +5,7 @@ from flask import jsonify
 
 from .config import Config
 from .sources import db, migrate
-from .routes import auth_bp, projects_bp, tasks_bp, time_entries_bp
+from .routes import auth_bp, projects_bp, tasks_bp, time_entries_bp, teams_bp, users_bp
 
 def register_routes(app: Flask):
     """
@@ -16,6 +16,8 @@ def register_routes(app: Flask):
     app.register_blueprint(projects_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(time_entries_bp)
+    app.register_blueprint(teams_bp)
+    app.register_blueprint(users_bp)
     
     
 
