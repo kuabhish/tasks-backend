@@ -25,3 +25,11 @@ def create_time_entry():
     if status_code == 201:
         return success_response(data=result, message=result["message"], status_code=status_code)
     return error_response(message=result["error"], status_code=status_code)
+
+
+@time_entries_bp.route('/update/<time_entry_id>', methods=['PUT'])
+@AuthAndLogMiddleware.authenticate_and_log
+def update_time_entry(time_entry_id):
+    data = request.get_json()
+    response, status = TimeEntryService.update_time_entry(time_entry_id, data)
+    return response, status
