@@ -1,3 +1,4 @@
+# app/models/project.py
 from uuid import uuid4
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
@@ -19,6 +20,7 @@ class Project(db.Model):
     milestones = db.Column(JSON, nullable=True)
     tech_stack = db.Column(ARRAY(db.String), default=[])
     repository_url = db.Column(db.String(255), nullable=True)
+    is_archived = db.Column(db.Boolean, default=False, nullable=True)  # New column for soft delete
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -28,15 +30,16 @@ class Project(db.Model):
             'customerId': self.customer_id,
             'title': self.title,
             'description': self.description,
-            'projectManagerId': self.project_manager_id,
+            'project_manager_id': self.project_manager_id,
             'status': self.status,
-            'startDate': self.start_date.isoformat() if self.start_date else None,
-            'endDate': self.end_date.isoformat() if self.end_date else None,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
             'budget': float(self.budget) if self.budget else None,
             'goals': self.goals,
             'milestones': self.milestones,
             'techStack': self.tech_stack,
-            'repositoryUrl': self.repository_url,
+            'repository_url': self.repository_url,
+            'is_archived': self.is_archived,  # Include in response
             'createdAt': self.created_at.isoformat(),
             'updatedAt': self.updated_at.isoformat()
         }

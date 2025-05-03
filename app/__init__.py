@@ -28,6 +28,8 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
+    # CORS(app, resources={r"/api/*": {"origins": ["http://localhost:*" ]}})
+
     CORS(app)  # Allow frontend access
     # CORS(app, resources={r"/*": {"origins": "*"}})
     # CORS(app, supports_credentials=True, allow_headers="*", origins="*", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])

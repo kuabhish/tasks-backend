@@ -27,17 +27,17 @@ class Task(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'customerId': self.customer_id,
-            'projectId': self.project_id,
-            'categoryId': self.category_id,
+            'customer_id': self.customer_id,
+            'project_id': self.project_id,
+            'category_id': self.category_id,
             'title': self.title,
             'description': self.description,
             'status': self.status,
             'priority': self.priority,
-            'dueDate': self.due_date.isoformat() if self.due_date else None,
+            'due_date': self.due_date.isoformat() if self.due_date else None,
             'tags': self.tags,
-            'estimatedDuration': self.estimated_duration,
-            'actualDuration': self.actual_duration,
-            'createdAt': self.created_at.isoformat(),
-            'updatedAt': self.updated_at.isoformat()
+            'estimated_duration': self.estimated_duration,
+            'actual_duration': self.actual_duration,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
         }

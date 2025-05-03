@@ -1,3 +1,4 @@
+# app/models/subtask.py
 from uuid import uuid4
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -5,7 +6,6 @@ from app import db
 
 class Subtask(db.Model):
     __tablename__ = 'subtasks'
-
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()))
     task_id = db.Column(db.String(36), db.ForeignKey('tasks.id'), nullable=False)
     title = db.Column(db.String(255), nullable=False)
@@ -22,15 +22,15 @@ class Subtask(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'taskId': self.task_id,
+            'task_id': self.task_id,
             'title': self.title,
             'description': self.description,
             'status': self.status,
-            'assignedUserId': self.assigned_user_id,
-            'assignedTeamId': self.assigned_team_id,
-            'dueDate': self.due_date.isoformat() if self.due_date else None,
+            'assigned_user_id': self.assigned_user_id,
+            'assigned_team_id': self.assigned_team_id,
+            'due_date': self.due_date.isoformat() if self.due_date else None,
             'tags': self.tags,
-            'estimatedDuration': self.estimated_duration,
-            'createdAt': self.created_at.isoformat(),
-            'updatedAt': self.updated_at.isoformat()
+            'estimated_duration': self.estimated_duration,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
         }

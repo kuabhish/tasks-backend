@@ -23,3 +23,31 @@ def create_project():
     if status_code == 201:
         return success_response(data=result, message=result["message"], status_code=status_code)
     return error_response(message=result["error"], status_code=status_code)
+
+
+@projects_bp.route("/update/<project_id>", methods=["PUT"])
+@AuthAndLogMiddleware.authenticate_and_log
+def update_project(project_id):
+    data = request.get_json()
+    result, status_code = project_service.update_project(project_id, data)
+    if status_code == 200:
+        return success_response(data=result, message=result["message"], status_code=status_code)
+    return error_response(message=result["error"], status_code=status_code)
+
+@projects_bp.route("/archive/<project_id>", methods=["DELETE"])
+@AuthAndLogMiddleware.authenticate_and_log
+def archive_project(project_id):
+    result, status_code = project_service.archive_project(project_id)
+    if status_code == 200:
+        return success_response(data=result, message=result["message"], status_code=status_code)
+    return error_response(message=result["error"], status_code=status_code)
+
+
+@projects_bp.route("/<project_id>/stats", methods=["GET"])
+@AuthAndLogMiddleware.authenticate_and_log
+def project_stats(project_id):
+    result, status_code = project_service.get_project_stats(project_id)
+    if status_code == 200:
+        return success_response(data=result, message="Success", status_code=status_code)
+    return error_response(message=result["error"], status_code=status_code)
+
