@@ -120,6 +120,12 @@ class TaskService:
                 task.description = data.get("description", "")
             if "status" in data:
                 task.status = data["status"]
+                # Set end_date when status is changed to Completed
+                if data["status"] == "Completed" and not task.end_date:
+                    task.end_date = datetime.utcnow()
+                # Clear end_date if status is changed from Completed to something else
+                elif data["status"] != "Completed" and task.end_date:
+                    task.end_date = None
             if "priority" in data:
                 task.priority = data["priority"]
             if "due_date" in data:
@@ -262,7 +268,19 @@ class TaskService:
             if not subtask:
                 return {"error": "Subtask not found or unauthorized"}, 404
 
-            # Update fields if provided
+            # Check if subtask status is changing from Not Started
+            previous_status = subtask.status
+            if "status" in data and data["status"] != previous_status:
+                if previous_status == "Not Started" and data["status"] in ["In Progress", "Completed"]:
+                    # Update parent task's start_date and status
+                    parent_task = subtask.task
+                    if not parent_task.start_date:
+                        parent_task.start_date = datetime.utcnow()
+                    if parent_task.status == "Not Started":
+                        parent_task.status = "In Progress"
+                        parent_task.updated_at = datetime.utcnow()
+
+            # Update subtask fields if provided
             if "title" in data:
                 subtask.title = data["title"]
             if "description" in data:

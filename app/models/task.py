@@ -19,6 +19,10 @@ class Task(db.Model):
     tags = db.Column(ARRAY(db.String), default=[])
     estimated_duration = db.Column(db.Integer, nullable=True)
     actual_duration = db.Column(db.Integer, nullable=True, default=0)
+    
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -38,6 +42,8 @@ class Task(db.Model):
             'tags': self.tags,
             'estimated_duration': self.estimated_duration,
             'actual_duration': self.actual_duration,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
