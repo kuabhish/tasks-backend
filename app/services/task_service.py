@@ -64,6 +64,50 @@ class TaskService:
             if not project:
                 return {"error": "Project not found or unauthorized"}, 404
 
+            # Sanitize estimated_duration
+            estimated_duration = data.get("estimated_duration")
+            if estimated_duration == "" or estimated_duration is None:
+                estimated_duration = None
+            else:
+                try:
+                    estimated_duration = int(estimated_duration)
+                    if estimated_duration < 0:
+                        return {"error": "Estimated duration must be non-negative"}, 400
+                except (ValueError, TypeError):
+                    return {"error": "Estimated duration must be a valid integer"}, 400
+
+            # Sanitize actual_duration
+            actual_duration = data.get("actual_duration")
+            if actual_duration == "" or actual_duration is None:
+                actual_duration = 0
+            else:
+                try:
+                    actual_duration = int(actual_duration)
+                    if actual_duration < 0:
+                        return {"error": "Actual duration must be non-negative"}, 400
+                except (ValueError, TypeError):
+                    return {"error": "Actual duration must be a valid integer"}, 400
+
+            # Sanitize due_date
+            due_date = data.get("due_date")
+            if due_date == "" or due_date is None:
+                due_date = None
+            else:
+                try:
+                    due_date = datetime.fromisoformat(due_date)
+                except (ValueError, TypeError):
+                    return {"error": "Due date must be a valid ISO 8601 date"}, 400
+
+            # Sanitize tags
+            tags = data.get("tags")
+            if tags == "" or tags is None:
+                tags = []
+            elif not isinstance(tags, list):
+                return {"error": "Tags must be an array of strings"}, 400
+            else:
+                if not all(isinstance(tag, str) for tag in tags):
+                    return {"error": "All tags must be strings"}, 400
+
             task = Task(
                 id=str(uuid4()),
                 customer_id=customer_id,
@@ -73,10 +117,10 @@ class TaskService:
                 description=data.get("description", ""),
                 status=data["status"],
                 priority=data.get("priority", "Medium"),
-                due_date=datetime.fromisoformat(data["due_date"]) if data.get("due_date") else None,
-                tags=data.get("tags", []),
-                estimated_duration=data.get("estimated_duration"),
-                actual_duration=data.get("actual_duration", 0),
+                due_date=due_date,
+                tags=tags,
+                estimated_duration=estimated_duration,
+                actual_duration=actual_duration,
                 created_at=datetime.utcnow(),
                 updated_at=datetime.utcnow()
             )
@@ -95,6 +139,7 @@ class TaskService:
             })
             db.session.rollback()
             return {"error": f"Failed to create task: {str(e)}"}, 500
+
 
     @staticmethod
     def update_task(task_id: str, data: dict) -> Tuple[dict, int]:
