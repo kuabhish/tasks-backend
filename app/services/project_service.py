@@ -156,7 +156,7 @@ class ProjectService:
             if role not in ["Admin", "Project Manager"]:
                 return {"error": "Insufficient permissions"}, 403
 
-            project = Project.query.filter_by(id=project_id, customer_id=customer_id, is_archived=False).first()
+            project = Project.query.filter_by(id=project_id, customer_id=customer_id).first()
             if not project:
                 return {"error": "Project not found or already archived"}, 404
 
