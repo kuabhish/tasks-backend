@@ -8,6 +8,7 @@ from typing import Tuple, List
 from datetime import datetime
 from uuid import uuid4
 from .. import db
+from ..dao import TeamsDao  # Import the new DAO
 
 class TeamService:
     @staticmethod
@@ -55,26 +56,11 @@ class TeamService:
             role = request.decoded.get("role")
             user_id = request.decoded.get("user_id")
 
-            if not customer_id:
-                return [{"error": "Unauthorized: Invalid token data"}], 401
-
-            query = Team.query.filter_by(customer_id=customer_id)
-            if role == "Team Member":
-                query = query.join(TeamMember, Team.id == TeamMember.team_id).filter(TeamMember.user_id == user_id)
-
-            teams = query.all()
-            team_dicts = []
-            for team in teams:
-                team_dict = team.to_dict()
-                members = TeamMember.query.filter_by(team_id=team.id).all()
-                team_dict['members'] = [
-                    {
-                        **tm.to_dict(),
-                        'user': User.query.get(tm.user_id).to_dict()
-                    } for tm in members
-                ]
-                team_dicts.append(team_dict)
-            return team_dicts, 200
+            result, status = TeamsDao.fetch_teams(customer_id, role, user_id)
+            # Adjust response format to match original
+            if status == 200:
+                return result["data"], 200
+            return [result], status
 
         except Exception as e:
             app_logger.error({
@@ -170,3 +156,4 @@ class TeamService:
             })
             # db.session.rollback()
             return {"error": f"Failed to remove user from team: {str(e)}"}, 500
+        
