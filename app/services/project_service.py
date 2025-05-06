@@ -183,29 +183,13 @@ class ProjectService:
     def get_project_stats(project_id: str) -> Tuple[dict, int]:
         try:
             customer_id = request.decoded.get("customer_id")
-            if not customer_id:
-                return {"error": "Unauthorized: Invalid token data"}, 401
-            project = Project.query.filter_by(id=project_id, customer_id=customer_id).first()
-            if not project:
-                return {"error": "Project not found or unauthorized"}, 404
-            tasks = Task.query.filter_by(project_id=project_id, customer_id=customer_id).all()
-            total_tasks = len(tasks)
-            total_subtasks = sum(len(Subtask.query.filter_by(task_id=task.id).all()) for task in tasks)
-            completed_subtasks = sum(
-                len([s for s in Subtask.query.filter_by(task_id=task.id).all() if s.status == 'Completed'])
-                for task in tasks
-            )
-            completion_rate = round((completed_subtasks / total_subtasks * 100) if total_subtasks > 0 else 0)
-            return {
-                "total_tasks": total_tasks,
-                "total_subtasks": total_subtasks,
-                "completed_subtasks": completed_subtasks,
-                "completion_rate": completion_rate
-            }, 200
+            return ProjectsDao.fetch_project_stats(project_id, customer_id)
+
         except Exception as e:
             app_logger.error({
-                "function": "ProjectService.get_project_stats",  # Fixed
+                "function": "ProjectService.get_project_stats",
                 "error": str(e),
                 "traceback": traceback.format_exc()
             })
-            return {"error": f"Failed to fetch project stats: {str(e)}"}, 500    
+            return {"error": f"Failed to fetch project stats: {str(e)}"}, 500
+        

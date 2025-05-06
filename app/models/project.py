@@ -43,3 +43,4 @@ class Project(db.Model):
             'createdAt': self.created_at.isoformat(),
             'updatedAt': self.updated_at.isoformat()
         }
+        
