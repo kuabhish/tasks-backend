@@ -1,4 +1,6 @@
 from flask import request
+
+from app.dao import TasksDao
 from ..models.task import Task
 from ..models.subtask import Subtask
 from ..models.project import Project
@@ -20,21 +22,29 @@ class TaskService:
             role = request.decoded.get("role")
             if not user_id or not customer_id:
                 return [{"error": "Unauthorized: Invalid token data"}], 401
-            query = Task.query.filter_by(customer_id=customer_id)
-            if project_id:
-                query = query.filter_by(project_id=project_id)
-            if role == "Team Member":
-                query = query.join(Subtask, Task.id == Subtask.task_id).filter(Subtask.assigned_user_id == user_id)
-            tasks = query.all()
-            task_dicts = []
-            for task in tasks:
-                task_dict = task.to_dict()
-                subtasks = Subtask.query.filter_by(task_id=task.id).all()
-                task_dict['subtasks'] = [subtask.to_dict() for subtask in subtasks]
-                completed = len([s for s in subtasks if s.status == 'Completed'])
-                task_dict['completion_percentage'] = round((completed / len(subtasks) * 100) if subtasks else 0)
-                task_dicts.append(task_dict)
-            return task_dicts, 200
+            # query = Task.query.filter_by(customer_id=customer_id)
+            # if project_id:
+            #     query = query.filter_by(project_id=project_id)
+            # if role == "Team Member":
+            #     query = query.join(Subtask, Task.id == Subtask.task_id).filter(Subtask.assigned_user_id == user_id)
+            # tasks = query.all()
+            # task_dicts = []
+            # for task in tasks:
+            #     task_dict = task.to_dict()
+            #     subtasks = Subtask.query.filter_by(task_id=task.id).all()
+            #     task_dict['subtasks'] = [subtask.to_dict() for subtask in subtasks]
+            #     completed = len([s for s in subtasks if s.status == 'Completed'])
+            #     task_dict['completion_percentage'] = round((completed / len(subtasks) * 100) if subtasks else 0)
+            #     task_dicts.append(task_dict)
+            # return task_dicts, 200
+            
+            tasks, status_code = TasksDao.list_tasks(
+                project_id=project_id,
+                user_id=user_id,
+                customer_id=customer_id,
+                role=role
+            )
+            return tasks, status_code
         except Exception as e:
             app_logger.error({
                 "function": "TaskService.list_tasks",
